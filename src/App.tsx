@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import './App.css'
 import BarChartExample from './components/BarChartExample'
 import PieChartExample from './components/PieChartExample'
@@ -7,7 +7,7 @@ import TableExample from './components/TableExample'
 function App() {
   const [page, setPage] = useState<"table" | "piechart" | "barchart">('table')
 
-  const pages: Record<string, JSX.Element> = {
+  const pages: Record<string, React.JSX.Element> = {
     barchart: <BarChartExample />,
     piechart: <PieChartExample />,
     table: <TableExample />,
