@@ -1,86 +1,33 @@
-import { PieChart, Pie } from 'recharts';
-
+import PieChartComponent from "./PieChartComponent";
 
 
 function PieChartExample() {
-
   const todayData = [
-    { name: 'Actual', value: 100 },
-    { name: 'Target', value: 12 },
+    { name: "Actual", value: 75, color: "#05337e" },
+    { name: "Target", value: 25, color: "#d3d3d3" },
   ];
   const yesterdayData = [
-    { name: 'Actual', value: 100 },
-    { name: 'Target', value: 0 },
+    { name: "Actual", value: 45, color: "#05337e" },
+    { name: "Target", value: 55, color: "#d3d3d3" },
   ];
-  const thisMonthData = [
-    { name: 'Actual', value: 100 },
-    { name: 'Target', value: 0 },
+  const nextMonthData = [
+    { name: "Actual", value: 60, color: "#05337e" },
+    { name: "Target", value: 40, color: "#d3d3d3" },
   ];
-
-
-
 
   return (
-    <div className='container mx-auto p-4'>
-      <div className='text-center my-4'>
-        <h2 className='text-2xl font-bold'>Area Clearance (in m2)</h2>
+    <div className="flex flex-col md:flex-row items-center justify-center gap-6 ">
+      <div className="flex flex-col items-center">
+        <PieChartComponent text="Today" contentData={todayData} needleValue={75} />
       </div>
-      <div className='flex flex-col md:flex-row gap-6 justify-center items-center'>
-        <div className='flex flex-col justify-center items-center'>
-          <h3><strong>Today</strong></h3>
-          <PieChart width={200} height={200}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              data={todayData}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={100}
-              fill="#05337e"
-              label
-            />
-          </PieChart>
-        </div>
-        <div className='flex flex-col justify-center items-center'>
-          <h3><strong>Yesterday</strong></h3>
-          <PieChart width={200} height={200}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              data={yesterdayData}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={100}
-              fill="#05337e"
-              label
-            />
-          </PieChart>
-        </div>
-        <div className='flex flex-col justify-center items-center'>
-          <h3><strong>This Month</strong></h3>
-          <PieChart width={200} height={200}>
-            <Pie
-              dataKey="value"
-              startAngle={180}
-              endAngle={0}
-              data={thisMonthData}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={100}
-              fill="#05337e"
-              label
-            />
-          </PieChart>
-        </div>
+      <div className="flex flex-col items-center">
+        <PieChartComponent text="Yesterday" contentData={yesterdayData} needleValue={45} />
       </div>
-
+      <div className="flex flex-col items-center">
+        <PieChartComponent text="Next Month" contentData={nextMonthData} needleValue={60} />
+      </div>
     </div>
-  )
+  );
 }
 
-export default PieChartExample
+export default PieChartExample;
