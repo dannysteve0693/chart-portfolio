@@ -1,42 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from "react";
+import { fetchTableData } from "../api";
 
 interface Row {
-    truckId: string;
-    date: string;
-    startFrom: string;
-    startTime: string;
-    destination: string;
+    actual_in_day: string | number;
+    target_in_day: string | number;
+    actual_in_yesterday: string | number;
+    target_in_yesterday: string | number;
+    actual_in_month: string | number;
+    target_in_month: string | number;
 }
 
-const initialData: Row[] = [
-    { truckId: "FM-12 [001]", date: "01-01-2025", startFrom: "aabbcc", startTime: "00:00", destination: "123123" },
-    { truckId: "FM-13 [002]", date: "02-01-2025", startFrom: "zzxxcc", startTime: "01:30", destination: "654321" },
-    { truckId: "FM-14 [003]", date: "03-01-2025", startFrom: "mnopqr", startTime: "03:15", destination: "789456" },
-    { truckId: "FM-15 [004]", date: "04-01-2025", startFrom: "lmnopq", startTime: "04:45", destination: "321654" },
-    { truckId: "FM-16 [005]", date: "05-01-2025", startFrom: "xyzuvw", startTime: "06:00", destination: "987321" },
-];
-
-
 function TableExample() {
-
+    const [tableContent, setTableContent] = useState<Row[]>([]);
     const [filter, setFilter] = useState("");
     const [page, setPage] = useState(1);
     const rowsPerPage = 3;
 
-    const filteredData = initialData.filter(
-        (row) =>
-            row.truckId.toLowerCase().includes(filter.toLowerCase()) ||
-            row.date.includes(filter) ||
-            row.startFrom.toLowerCase().includes(filter.toLowerCase()) ||
-            row.startTime.includes(filter) ||
-            row.destination.includes(filter)
-    );
+    useEffect(() => {
+        let isMounted = true;
+
+        fetchTableData()
+            .then((raw: Row[]) => {
+                if (!isMounted) return;
+
+                const maybeArray = raw;
+
+                const normalized: Row[] = Array.isArray(maybeArray)
+                    ? (maybeArray as Row[])
+                    : maybeArray
+                        ? [maybeArray as Row]
+                        : [];
+
+                setTableContent(normalized);
+            })
+            .catch((err) => {
+                console.error("Fetch error:", err);
+                setTableContent([]);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const filteredData = useMemo<Row[]>(() => {
+        const arr = Array.isArray(tableContent) ? tableContent : [];
+        if (!filter) return arr;
+        const lower = filter.toLowerCase();
+        return arr.filter((row) =>
+            Object.values(row).some((v) => String(v).toLowerCase().includes(lower))
+        );
+    }, [tableContent, filter]);
 
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-    const paginatedData = filteredData.slice(
-        (page - 1) * rowsPerPage,
-        page * rowsPerPage
-    );
+
+    const paginatedData = useMemo(() => {
+        const start = (page - 1) * rowsPerPage;
+        return filteredData.slice(start, start + rowsPerPage);
+    }, [filteredData, page]);
 
     return (
         <div className="overflow-x-auto p-4">
@@ -56,11 +77,12 @@ function TableExample() {
             <table className="min-w-full border-collapse border border-gray-200 table-auto whitespace-nowrap">
                 <thead>
                     <tr>
-                        <th className="border border-gray-300 px-4 py-2">Truck ID</th>
-                        <th className="border border-gray-300 px-4 py-2">Date</th>
-                        <th className="border border-gray-300 px-4 py-2">Start From</th>
-                        <th className="border border-gray-300 px-4 py-2">Start Time</th>
-                        <th className="border border-gray-300 px-4 py-2">StockPile Destination</th>
+                        <th className="border px-4 py-2">Actual in Day</th>
+                        <th className="border px-4 py-2">Target in Day</th>
+                        <th className="border px-4 py-2">Actual in Yesterday</th>
+                        <th className="border px-4 py-2">Target in Yesterday</th>
+                        <th className="border px-4 py-2">Actual in Month</th>
+                        <th className="border px-4 py-2">Target in Month</th>
                     </tr>
                 </thead>
                 <tbody className="text-center">
@@ -69,16 +91,17 @@ function TableExample() {
                             key={idx}
                             className="odd:bg-white even:bg-gray-100 border border-gray-300"
                         >
-                            <td>{row.truckId}</td>
-                            <td>{row.date}</td>
-                            <td>{row.startFrom}</td>
-                            <td>{row.startTime}</td>
-                            <td>{row.destination}</td>
+                            <td>{row.actual_in_day}</td>
+                            <td>{row.target_in_day}</td>
+                            <td>{row.actual_in_yesterday}</td>
+                            <td>{row.target_in_yesterday}</td>
+                            <td>{row.actual_in_month}</td>
+                            <td>{row.target_in_month}</td>
                         </tr>
                     ))}
                     {paginatedData.length === 0 && (
                         <tr>
-                            <td colSpan={5} className="py-4 text-gray-500">
+                            <td colSpan={6} className="py-4 text-gray-500">
                                 No results found
                             </td>
                         </tr>
@@ -106,8 +129,7 @@ function TableExample() {
                 </button>
             </div>
         </div>
-
-    )
+    );
 }
 
-export default TableExample
+export default TableExample;
