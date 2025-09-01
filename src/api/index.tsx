@@ -13,5 +13,13 @@ const fetchTableData = async () => {
     return response.json();
 }
 
+const fetchBarChartData = async () => {
+    const response = await fetch(`${API_URL}/Home/DataChartBar`, { headers });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+}
 
-export { fetchTableData };
+
+export { fetchTableData, fetchBarChartData };
