@@ -1,17 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { fetchTableData } from "../api";
 
-interface Row {
-    actual_in_day: string | number;
-    target_in_day: string | number;
-    actual_in_yesterday: string | number;
-    target_in_yesterday: string | number;
-    actual_in_month: string | number;
-    target_in_month: string | number;
-}
+import type { TypePieChart } from "../types";
 
 function TableExample() {
-    const [tableContent, setTableContent] = useState<Row[]>([]);
+    const [tableContent, setTableContent] = useState<TypePieChart[]>([]);
     const [filter, setFilter] = useState("");
     const [page, setPage] = useState(1);
     const rowsPerPage = 3;
@@ -20,15 +13,15 @@ function TableExample() {
         let isMounted = true;
 
         fetchTableData()
-            .then((raw: Row[]) => {
+            .then((raw: TypePieChart[]) => {
                 if (!isMounted) return;
 
                 const maybeArray = raw;
 
-                const normalized: Row[] = Array.isArray(maybeArray)
-                    ? (maybeArray as Row[])
+                const normalized: TypePieChart[] = Array.isArray(maybeArray)
+                    ? (maybeArray as TypePieChart[])
                     : maybeArray
-                        ? [maybeArray as Row]
+                        ? [maybeArray as TypePieChart]
                         : [];
 
                 setTableContent(normalized);
@@ -43,7 +36,7 @@ function TableExample() {
         };
     }, []);
 
-    const filteredData = useMemo<Row[]>(() => {
+    const filteredData = useMemo<TypePieChart[]>(() => {
         const arr = Array.isArray(tableContent) ? tableContent : [];
         if (!filter) return arr;
         const lower = filter.toLowerCase();

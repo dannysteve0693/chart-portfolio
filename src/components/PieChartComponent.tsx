@@ -1,19 +1,11 @@
 import { PieChart, Pie, Cell } from "recharts";
 
+import type { NeedleProps, PieChartComponentProps } from "../types";
+
 const RADIAN = Math.PI / 180;
 
-type NeedleProps = {
-    value: number;
-    data: { name: string; value: number; color?: string }[];
-    cx: number;
-    cy: number;
-    iR: number;
-    oR: number;
-    color: string;
-};
-
 const Needle: React.FC<NeedleProps> = ({ value, data, cx, cy, iR, oR, color }) => {
-    const total = data.reduce((sum, entry) => sum + entry.value, 0);
+    const total = data.reduce((sum, entry) => sum + entry.percent, 0);
     const ang = 180 * (1 - value / total);
     const length = (iR + 2 * oR) / 3;
     const sin = Math.sin(-RADIAN * ang);
@@ -37,18 +29,6 @@ const Needle: React.FC<NeedleProps> = ({ value, data, cx, cy, iR, oR, color }) =
     );
 };
 
-type chartData = {
-    name: string;
-    value: number;
-    color?: string;
-}
-
-type PieChartComponentProps = {
-    text: string;
-    contentData: chartData[];
-    needleValue: number;
-}
-
 function PieChartComponent(
     { text, contentData, needleValue }: PieChartComponentProps) {
     const iR = 60;
@@ -63,7 +43,7 @@ function PieChartComponent(
             </div>
             <PieChart width={300} height={180}>
                 <Pie
-                    dataKey="value"
+                    dataKey="percent"
                     startAngle={180}
                     endAngle={0}
                     data={contentData}

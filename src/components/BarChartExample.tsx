@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LabelList, Cell } from "recharts";
 import { fetchBarChartData } from "../api";
-
-type ApiItem = {
-  stock_capacity_actual: number;
-};
-
-type ChartItem = {
-  name: string;
-  uv: number;
-  color: string;
-};
+import type { ApiItem, ChartItem } from "../types";
 
 function BarChartExample() {
   const [chartData, setChartData] = useState<ChartItem[]>([]);
