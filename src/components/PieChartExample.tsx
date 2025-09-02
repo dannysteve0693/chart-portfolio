@@ -1,7 +1,7 @@
 import PieChartComponent from "./PieChartComponent";
 import { useEffect, useState } from "react";
 import type { TypePieChart, PieChartDataProps } from "../types";
-import { fetchTableData } from "../api";
+import { fetchPieChartData } from "../api";
 
 function PieChartExample() {
   const [todayData, setTodayData] = useState<PieChartDataProps[]>([]);
@@ -16,7 +16,7 @@ function PieChartExample() {
 
     (async () => {
       try {
-        const raw: TypePieChart[] = await fetchTableData();
+        const raw: TypePieChart[] = await fetchPieChartData();
         if (!isMounted) return;
 
         const normalized: TypePieChart[] = Array.isArray(raw)

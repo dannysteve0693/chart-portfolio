@@ -1,98 +1,71 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { fetchTableData } from "../api";
 
-import type { TypePieChart } from "../types";
+import type { TableItem, TableDataItem } from "../types";
 
 function TableExample() {
-    const [tableContent, setTableContent] = useState<TypePieChart[]>([]);
-    const [filter, setFilter] = useState("");
+    const [tableContent, setTableContent] = useState<TableDataItem[]>([]);
     const [page, setPage] = useState(1);
-    const rowsPerPage = 3;
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const rowsPerPage = 5;
 
     useEffect(() => {
         let isMounted = true;
+        setLoading(true);
 
-        fetchTableData()
-            .then((raw: TypePieChart[]) => {
+        fetchTableData(page, rowsPerPage)
+            .then((raw: TableItem) => {
                 if (!isMounted) return;
-
-                const maybeArray = raw;
-
-                const normalized: TypePieChart[] = Array.isArray(maybeArray)
-                    ? (maybeArray as TypePieChart[])
-                    : maybeArray
-                        ? [maybeArray as TypePieChart]
-                        : [];
-
-                setTableContent(normalized);
+                setTableContent(raw.data);
+                setTotalPages(raw.totalPages);
             })
             .catch((err) => {
                 console.error("Fetch error:", err);
                 setTableContent([]);
-            });
+            })
+            .finally(() => setLoading(false));
 
         return () => {
             isMounted = false;
         };
-    }, []);
-
-    const filteredData = useMemo<TypePieChart[]>(() => {
-        const arr = Array.isArray(tableContent) ? tableContent : [];
-        if (!filter) return arr;
-        const lower = filter.toLowerCase();
-        return arr.filter((row) =>
-            Object.values(row).some((v) => String(v).toLowerCase().includes(lower))
-        );
-    }, [tableContent, filter]);
-
-    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-
-    const paginatedData = useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        return filteredData.slice(start, start + rowsPerPage);
-    }, [filteredData, page]);
+    }, [page]);
 
     return (
         <div className="overflow-x-auto p-4">
-            <div className="mb-3">
-                <input
-                    type="text"
-                    placeholder="Filter..."
-                    value={filter}
-                    onChange={(e) => {
-                        setFilter(e.target.value);
-                        setPage(1);
-                    }}
-                    className="border border-gray-300 px-3 py-2 rounded-md w-64"
-                />
-            </div>
-
             <table className="min-w-full border-collapse border border-gray-200 table-auto whitespace-nowrap">
                 <thead>
                     <tr>
-                        <th className="border px-4 py-2">Actual in Day</th>
-                        <th className="border px-4 py-2">Target in Day</th>
-                        <th className="border px-4 py-2">Actual in Yesterday</th>
-                        <th className="border px-4 py-2">Target in Yesterday</th>
-                        <th className="border px-4 py-2">Actual in Month</th>
-                        <th className="border px-4 py-2">Target in Month</th>
+                        <th className="border px-4 py-2">No</th>
+                        <th className="border px-4 py-2">Vehicle Name</th>
+                        <th className="border px-4 py-2">Area Name</th>
+                        <th className="border px-4 py-2">Target Qty Name</th>
+                        <th className="border px-4 py-2">Stockpile Destination</th>
+                        <th className="border px-4 py-2">Pile ID</th>
                     </tr>
                 </thead>
                 <tbody className="text-center">
-                    {paginatedData.map((row, idx) => (
-                        <tr
-                            key={idx}
-                            className="odd:bg-white even:bg-gray-100 border border-gray-300"
-                        >
-                            <td>{row.actual_in_day}</td>
-                            <td>{row.target_in_day}</td>
-                            <td>{row.actual_in_yesterday}</td>
-                            <td>{row.target_in_yesterday}</td>
-                            <td>{row.actual_in_month}</td>
-                            <td>{row.target_in_month}</td>
+                    {loading ? (
+                        <tr>
+                            <td colSpan={6} className="py-4 text-gray-500">
+                                Loading...
+                            </td>
                         </tr>
-                    ))}
-                    {paginatedData.length === 0 && (
+                    ) : tableContent.length > 0 ? (
+                        tableContent.map((row) => (
+                            <tr
+                                key={row.id}
+                                className="odd:bg-white even:bg-gray-100 border border-gray-300"
+                            >
+                                <td>{row.no}</td>
+                                <td>{row.verhicle_name}</td>
+                                <td>{row.area_name}</td>
+                                <td>{row.target_qty_name}</td>
+                                <td>{row.stockpile_destination}</td>
+                                <td>{row.pile_id}</td>
+                            </tr>
+                        ))
+                    ) : (
                         <tr>
                             <td colSpan={6} className="py-4 text-gray-500">
                                 No results found
